@@ -17,7 +17,7 @@ RSpec.describe CycloneLariat::Middleware do
     let(:notifier) { instance_double(LunaPark::Notifiers::Log, error: nil, warning: nil) }
 
     context 'when message_notifier is defined' do
-      let(:middleware) { described_class.new(message_notifier: notifier, driver: :sequel) }
+      let(:middleware) { described_class.new({ message_notifier: notifier, driver: :sequel }) }
 
       it 'should write INFO log message' do
         expect(notifier).to receive(:info).with(
@@ -37,7 +37,7 @@ RSpec.describe CycloneLariat::Middleware do
     end
 
     context 'when errors_notifier is defined' do
-      let(:middleware) { described_class.new(errors_notifier: notifier, driver: :sequel) }
+      let(:middleware) { described_class.new({ errors_notifier: notifier, driver: :sequel }) }
 
       context 'no any one exception is handled' do
         it 'should not write log message' do
@@ -111,7 +111,7 @@ RSpec.describe CycloneLariat::Middleware do
       let(:dataset) { double }
       let(:messages_repo) { instance_double CycloneLariat::Repo::InboxMessages, disabled?: false, find: event }
       let(:messages_repo_class) { class_double(CycloneLariat::Repo::InboxMessages, new: messages_repo) }
-      let(:middleware) { described_class.new(inbox_dataset: dataset, repo: messages_repo_class) }
+      let(:middleware) { described_class.new({ inbox_dataset: dataset, repo: messages_repo_class }) }
       let(:event) { instance_double CycloneLariat::Messages::V1::Event, processed?: true }
 
       context 'when event is already exists in dataset' do
@@ -157,7 +157,7 @@ RSpec.describe CycloneLariat::Middleware do
       context 'when before_save hook is defined' do
         let(:on_before_save) { double(call: true) }
         let(:messages_repo) { instance_double CycloneLariat::Repo::InboxMessages, disabled?: false, find: nil, create: nil, processed!: true }
-        let(:middleware) { described_class.new(inbox_dataset: dataset, repo: messages_repo_class, before_save: on_before_save) }
+        let(:middleware) { described_class.new({ inbox_dataset: dataset, repo: messages_repo_class, before_save: on_before_save }) }
 
         it 'should call the hook' do
           expect(on_before_save).to receive(:call)
@@ -167,7 +167,7 @@ RSpec.describe CycloneLariat::Middleware do
     end
 
     context 'when dataset is not defined' do
-      let(:middleware) { described_class.new(inbox_dataset: nil, driver: :sequel) }
+      let(:middleware) { described_class.new({ inbox_dataset: nil, driver: :sequel }) }
 
       it { is_expected.to be :result }
 
@@ -192,7 +192,7 @@ RSpec.describe CycloneLariat::Middleware do
         end
       end
 
-      let(:middleware) { described_class.new(inbox_dataset: nil) }
+      let(:middleware) { described_class.new({ inbox_dataset: nil }) }
 
       it { is_expected.to be true }
 
